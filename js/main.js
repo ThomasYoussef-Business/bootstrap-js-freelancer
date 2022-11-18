@@ -109,10 +109,12 @@ function mandaForm(evento) {
         if (codiceInserito) { // Se effettivamente c'è un codice da controllare
             if (codiciSconto.hasOwnProperty(codiceInserito)) { // Se il codice esiste
                 if (codiciSconto[codiceInserito]) { // ed è ancora valido
+
                     prezzo = prezzo * (1 - 0.25); // Applica sconto
                     codiciSconto[codiceInserito] = false; // Marchia codice come scaduto / usato
                     impostaScontoComeValido(); // Marchia input come valido
                     mostraPrezzo(prezzo);
+                    
                 } else { // Altrimenti è scaduto
                     impostaScontoComeScaduto();
                 }
