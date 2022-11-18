@@ -24,6 +24,8 @@
  * - Mostrare il risultato del prezzo in modo accessibile all'utente
  */
 
+
+/* -------------------------------------------------------------------------- */
 const codiciSconto = {
     YHDNU32: true,
     JANJC63: true,
@@ -38,21 +40,27 @@ const prezzi = {
     analysis: 33.60,
 };
 
-const elementoForm = document.getElementById('formOfferta');
-const inputTipoLavoro = document.getElementById("worktype");
-const inputSconto = document.getElementById("discountcode");
-const feedbackScontoInvalido = document.getElementById("feedbackScontoInvalido");
-const feedbackScontoValido = document.getElementById("feedbackScontoValido");
-const spanPrezzo = document.getElementById("spanPrezzo");
-const inputOre = document.getElementById("hoursrequired");
 const formattatorePrezzo = new Intl.NumberFormat(navigator.languages[0], {
     style: 'currency',
     currency: 'EUR'
 });
 
-inputSconto.addEventListener("input", () => {
-    feedbackScontoInvalido.innerHTML = "Il codice di sconto non esiste.";
-});
+
+
+/* ----------------------- Elementi vari presi dall'ID ---------------------- */
+/* -------------------------------------------------------------------------- */
+const elementoForm = document.getElementById('formOfferta');
+const inputTipoLavoro = document.getElementById("worktype");
+const inputSconto = document.getElementById("discountcode");
+const scontoInvalido = document.getElementById("feedbackScontoInvalido");
+const scontoValido = document.getElementById("feedbackScontoValido");
+const spanPrezzo = document.getElementById("spanPrezzo");
+const inputOre = document.getElementById("hoursrequired");
+/* -------------------------------------------------------------------------- */
+
+inputSconto.addEventListener('input', function () {
+    resettaLabelSconto();
+}, false)
 
 /* ---------------------------- Sezione funzioni ---------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -60,63 +68,41 @@ function mandaForm(evento) {
     evento.preventDefault();
     evento.stopPropagation();
     elementoForm.classList.add('was-validated');
+    resettaLabelSconto();
+
     const formValido = elementoForm.checkValidity();
     if (formValido) {
+        const codiceInserito = inputSconto.value;
         let prezzo = prezzi[inputTipoLavoro.value] * inputOre.value;
-        validaSconto();
+        if (codiciSconto.hasOwnProperty(codiceInserito)) {
+            if (codiciSconto[codiceInserito]) {
+                prezzo = prezzo * (1 - 0.25); // Applica sconto
+                codiciSconto[codiceInserito] = false; // Marchia codice come scaduto / usato
+                scontoValido.innerHTML = "Codice valido! Sconto del 25% applicato" // Aggiorna messaggio di codice valido
+                inputSconto.classList.add('is-valid'); // Marchia input come valido
+                spanPrezzo.parentNode.parentNode.classList.remove('d-none'); // Mostra prezzo
+                spanPrezzo.innerHTML = formattatorePrezzo.format(prezzo);
 
-        aggiornaPrezzo(spanPrezzo, prezzo)
+            } else {
+                scontoInvalido.innerHTML = "Codice scaduto o già utilizzato." // Aggiorna messaggio di codice invalido
+                inputSconto.classList.add('is-invalid', 'text-danger');
+                spanPrezzo.parentNode.parentNode.classList.add('d-none');
+            }
+        } else {
+            scontoInvalido.innerHTML = "Il codice non esiste." // Aggiorna messaggio di codice invalido
+            inputSconto.classList.add('is-invalid', 'text-danger');
+            spanPrezzo.parentNode.parentNode.classList.add('d-none');
+        }
     } else {
-        elementoPrezzo.parentNode.parentNode.classList.add('d-none');
+        spanPrezzo.parentNode.parentNode.classList.add('d-none');
     }
 };
 
-function aggiornaPrezzo(elementoPrezzo, numeroPrezzo) {
-    elementoPrezzo.parentNode.parentNode.classList.remove('d-none');
-    elementoPrezzo.innerHTML = `${formattatorePrezzo.format(numeroPrezzo)}`;
+/* -------------------------------------------------------------------------- */
+function resettaLabelSconto() {
+    inputSconto.classList.remove('is-valid', 'is-invalid', 'text-danger');
+    scontoValido.innerHTML = '';
+    scontoInvalido.innerHTML = "Il formato del codice non è corretto.";
 };
 
-function validaSconto() {
-    const codice = inputSconto.value;
-    inputSconto.checkValidity();
-    feedbackScontoValido.innerHTML = '';
-    feedbackScontoInvalido.innerHTML = '';
-    switch (codiciSconto[codice]) {
-        case undefined:
-            impostaLabelSconto(
-                'is-invalid',
-                'is-valid',
-                "",
-                "Questo codice non esiste."
-            );
-            break;
-
-        case false:
-            impostaLabelSconto(
-                'is-invalid',
-                'is-valid',
-                "",
-                "Il codice è scaduto, oppure è gia stato utilizzato."
-            );
-            break;
-
-        case true:
-            impostaLabelSconto(
-                'is-valid',
-                'is-invalid',
-                "Il codice è valido! Sconto del 20% applicato",
-                "Questo codice non esiste."
-            )
-            break;
-
-        default:
-            break;
-    }
-}
-
-function impostaLabelSconto(classToAdd, classToRemove, validMessage, invalidMessage) {
-    inputSconto.classList.add(classToAdd);
-    inputSconto.classList.remove(classToRemove);
-    feedbackScontoValido.innerHTML = validMessage;
-    feedbackScontoInvalido.innerHTML = invalidMessage;
-}
+/* -------------------------------------------------------------------------- */
