@@ -45,6 +45,33 @@ const formattatorePrezzo = new Intl.NumberFormat(navigator.languages[0], {
     currency: 'EUR'
 });
 
+const carteSiti = {
+    cabin: {
+        nome: "Cabin Website",
+        path_immagine: "./img/portfolio/cabin.png",
+    },
+    cake: {
+        nome: "Cake Website",
+        path_immagine: "./img/portfolio/cake.png",
+    },
+    circus: {
+        nome: "Circus Website",
+        path_immagine: "./img/portfolio/circus.png",
+    },
+    game: {
+        nome: "Game Website",
+        path_immagine: "./img/portfolio/game.png",
+    },
+    safe: {
+        nome: "Safe Website",
+        path_immagine: "./img/portfolio/safe.png",
+    },
+    submarine: {
+        nome: "Submarine Website",
+        path_immagine: "./img/portfolio/submarine.png",
+    },
+}
+
 
 
 /* ----------------------- Elementi vari presi dall'ID ---------------------- */
@@ -56,11 +83,16 @@ const scontoInvalido = document.getElementById("feedbackScontoInvalido");
 const scontoValido = document.getElementById("feedbackScontoValido");
 const spanPrezzo = document.getElementById("spanPrezzo");
 const inputOre = document.getElementById("hoursrequired");
+const rowCarte = document.getElementById("row-carte");
 /* -------------------------------------------------------------------------- */
 
 inputSconto.addEventListener('input', function () {
     resettaLabelSconto();
 }, false)
+
+for (const carta in carteSiti) {
+    rowCarte.innerHTML += componenteCard(carteSiti[carta].nome, carteSiti[carta].path_immagine);
+}
 
 /* ---------------------------- Sezione funzioni ---------------------------- */
 /* -------------------------------------------------------------------------- */
@@ -105,21 +137,48 @@ function mostraPrezzo(prezzo) {
 function nascondiPrezzo() {
     spanPrezzo.parentNode.parentNode.classList.add('d-none');
 }
-        } else {
-            scontoInvalido.innerHTML = "Il codice non esiste." // Aggiorna messaggio di codice invalido
-            inputSconto.classList.add('is-invalid', 'text-danger');
-            spanPrezzo.parentNode.parentNode.classList.add('d-none');
-        }
-    } else {
-        spanPrezzo.parentNode.parentNode.classList.add('d-none');
-    }
-};
+
+/* -------------------------------------------------------------------------- */
+function impostaScontoComeValido() {
+    scontoValido.innerHTML = "Codice valido! Sconto del 25% applicato"; // Aggiorna messaggio di codice valido
+    inputSconto.classList.add('is-valid', 'text-success');
+}
+
+/* -------------------------------------------------------------------------- */
+function impostaScontoComeInesistente() {
+    scontoInvalido.innerHTML = "Il codice non esiste."; // Aggiorna messaggio di codice invalido
+    inputSconto.classList.add('is-invalid', 'text-danger');
+    nascondiPrezzo();
+}
+
+/* -------------------------------------------------------------------------- */
+function impostaScontoComeScaduto() {
+    scontoInvalido.innerHTML = "Codice scaduto o già utilizzato."; // Aggiorna messaggio di codice invalido
+    inputSconto.classList.add('is-invalid', 'text-danger');
+    nascondiPrezzo();
+}
 
 /* -------------------------------------------------------------------------- */
 function resettaLabelSconto() {
-    inputSconto.classList.remove('is-valid', 'is-invalid', 'text-danger');
+    inputSconto.classList.remove('is-valid', 'is-invalid', 'text-danger', 'text-success');
     scontoValido.innerHTML = '';
     scontoInvalido.innerHTML = "Il formato del codice non è corretto.";
 };
 
 /* -------------------------------------------------------------------------- */
+function componenteCard(testoCard, path_immagine) {
+    return `
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-img-top">
+                <img class="img-fluid" src="${path_immagine}" alt="A drawing of a cabin">
+            </div>
+            <div class="card-body">
+                <p class="fs-5 fw-semibold m-0 mb-2">${testoCard}</p>
+                <button class="mx-1 btn btn-info btn-sm">Preview</button>
+                <button class="mx-1 btn btn-outline-info btn-sm">Visit site</button>
+            </div>
+        </div>
+    </div>
+    `;
+}
